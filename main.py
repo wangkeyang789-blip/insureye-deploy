@@ -641,6 +641,14 @@ div.sample-btn-wrapper button {
     font-size: 15px !important;
     pointer-events: auto !important;
 }
+/* 🔥 隐藏右下角图标 */
+div[data-testid="stStatusWidget"], div[class*="stDeployButton"], .stAppDeployButton {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    position: absolute !important;
+    z-index: -999 !important;
+}
 </style>
 """, unsafe_allow_html=True)
 
