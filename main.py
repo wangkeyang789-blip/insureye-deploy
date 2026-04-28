@@ -1,6 +1,8 @@
 import os
-os.environ["OPENCV_OPENCL_RUNTIME"] = ""
-os.environ["CV2_IO_BUFFER_SIZE"] = "0"
+import sys
+# 强制绕过 libGL 错误
+os.environ['CV2_OPENCV_HEADLESS'] = '1'
+os.environ['OPENCV_VIDEOIO_PRIORITY'] = '0'
 import streamlit as st
 import torch
 import torch.nn as nn
