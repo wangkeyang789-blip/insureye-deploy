@@ -1,6 +1,7 @@
-streamlit==1.32.2
-pillow
-numpy
-torch
-torchvision
+-i https://pypi.tuna.tsinghua.edu.cn/simple/
+streamlit>=1.28
+torch>=2.0
+torchvision>=0.15
 ultralytics
+pillow
+requests
