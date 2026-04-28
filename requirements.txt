@@ -1,7 +1,4 @@
 -i https://pypi.tuna.tsinghua.edu.cn/simple/
-opencv-python==99.0.0-
-opencv-python-headless
-# 其他依赖
 streamlit
 ultralytics
 torch>=2.9.0
@@ -9,3 +6,4 @@ torchvision
 pillow
 pandas
 numpy
+opencv-python-headless
