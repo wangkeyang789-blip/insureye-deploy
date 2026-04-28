@@ -875,8 +875,8 @@ elif st.session_state.page_state == "result":
     <style>
     .down-arrow {
         position: fixed;
-        left: 16%;
-        top: 42%;
+        left: 20%;
+        top: 50%;
         z-index: 1000;
         opacity: 0.95;
         pointer-events: none;
@@ -884,8 +884,8 @@ elif st.session_state.page_state == "result":
     }
     .down-arrow-text {
         position: fixed;
-        left: 19%;
-        top: 38%;
+        left: 23%;
+        top: 46%;
         font-size: 14px;
         font-weight: 400;
         color: #aaddff;
