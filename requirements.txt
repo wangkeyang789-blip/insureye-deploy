@@ -2,7 +2,7 @@
 streamlit
 ultralytics
 opencv-python-headless
-torch>=2.9.0
+torch>=2.0.0
 torchvision
 pillow
 pandas
