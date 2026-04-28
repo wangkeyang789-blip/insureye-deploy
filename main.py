@@ -1,3 +1,6 @@
+import os
+os.environ["OPENCV_OPENCL_RUNTIME"] = ""
+os.environ["CV2_IO_BUFFER_SIZE"] = "0"
 import streamlit as st
 import torch
 import torch.nn as nn
@@ -7,7 +10,6 @@ import torchvision.transforms as transforms
 import warnings
 import base64
 from io import BytesIO
-import os
 import glob
 import time
 
