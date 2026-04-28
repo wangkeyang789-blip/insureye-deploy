@@ -817,6 +817,16 @@ if st.session_state.page_state == "home":
         st.rerun()
 # -------------------------- 结果页 --------------------------
 elif st.session_state.page_state == "result":
+    # 🔥 新增：电脑端自动缩放到 80%
+    st.markdown("""
+    <script>
+    // 只在电脑端生效
+    if (!(/mobile|android|iphone|ipad/i.test(navigator.userAgent))) {
+        document.body.style.zoom = "80%";
+    }
+    </script>
+    """
+, unsafe_allow_html=True)
     st.session_state.sample_img_list = None
     results = st.session_state.cached_results
     if not results:
