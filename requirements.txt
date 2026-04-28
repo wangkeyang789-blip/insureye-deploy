@@ -1,9 +1,9 @@
 -i https://pypi.tuna.tsinghua.edu.cn/simple/
 streamlit
+ultralytics
 opencv-python-headless
-ultralytics --no-deps
-torch>=2.0.0
-torchvision
+torch==2.0.0
+torchvision==0.15.0
 pillow
 pandas
 numpy
