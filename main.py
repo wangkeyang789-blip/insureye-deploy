@@ -12,6 +12,7 @@ import torchvision.transforms as transforms
 import warnings
 import base64
 from io import BytesIO
+import os
 import glob
 import time
 
@@ -593,6 +594,7 @@ st.markdown("""
         text-decoration: none !important;
         display: inline-block;
         opacity: 0.5;
+        animation: archSweepLight 1s infinite ease-in-out;
     }
     .arch-btn:hover {
         transform: scale(1.05);
@@ -643,13 +645,16 @@ div.sample-btn-wrapper button {
     font-size: 15px !important;
     pointer-events: auto !important;
 }
-/* 🔥 隐藏右下角图标 */
-div[data-testid="stStatusWidget"], div[class*="stDeployButton"], .stAppDeployButton {
-    display: none !important;
-    visibility: hidden !important;
-    opacity: 0 !important;
-    position: absolute !important;
-    z-index: -999 !important;
+/* 真正的横向流光扫过 */
+@keyframes archSweepLight {
+
+  /* 平缓横向划过 */
+  50% {
+    background-position: 100% 50%;
+    opacity: 0.85;
+  }
+
+  
 }
 </style>
 """, unsafe_allow_html=True)
@@ -827,16 +832,6 @@ if st.session_state.page_state == "home":
         st.rerun()
 # -------------------------- 结果页 --------------------------
 elif st.session_state.page_state == "result":
-    # 🔥 新增：电脑端自动缩放到 80%
-    st.markdown("""
-    <script>
-    // 只在电脑端生效
-    if (!(/mobile|android|iphone|ipad/i.test(navigator.userAgent))) {
-        document.body.style.zoom = "80%";
-    }
-    </script>
-    """
-, unsafe_allow_html=True)
     st.session_state.sample_img_list = None
     results = st.session_state.cached_results
     if not results:
@@ -874,45 +869,46 @@ elif st.session_state.page_state == "result":
     st.markdown("---")
     
     st.markdown("""
-    <style>
-    .down-arrow {
-        position: fixed;
-        left: 20%;
-        top: 100%;
-        z-index: 1000;
-        opacity: 0.95;
-        pointer-events: none;
-        animation: bounce 1.2s infinite ease-in-out;
-    }
-    .down-arrow-text {
-        position: fixed;
-        left: 23%;
-        top: 46%;
-        font-size: 14px;
-        font-weight: 400;
-        color: #aaddff;
-        text-shadow: 0 0 8px rgba(0,204,255,0.6);
-        writing-mode: vertical-rl;
-        text-orientation: mixed;
-        letter-spacing: 5px;
-        animation: bounce 1.2s infinite ease-in-out, textGlow 2s infinite alternate;
-        z-index: 1000;
-        white-space: nowrap;
-        pointer-events: none;
-        font-family: 'Segoe UI', 'Microsoft YaHei', monospace;
-    }
-    @keyframes bounce {
-        0%,100% { transform: translateY(0px); }
-        50% { transform: translateY(10px); }
-    }
-    @keyframes textGlow {
-        0% { text-shadow: 0 0 4px rgba(0,204,255,0.4); }
-        100% { text-shadow: 0 0 12px rgba(0,204,255,0.9); }
-    }
-    </style>
-    
+<style>
+.down-arrow {
+    position: absolute;
+    left: 37px;
+    top: -420px;
+    z-index: 1000;
+    opacity: 0.95;
+    pointer-events: none;
+    animation: bounce 1.2s infinite ease-in-out;
+}
+.down-arrow-text {
+    position: absolute;
+    left: 50px;
+    top: -570px;
+    font-size: 14px;
+    font-weight: 400;
+    color: #aaddff;
+    text-shadow: 0 0 8px rgba(0,204,255,0.6);
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    letter-spacing: 5px;
+    animation: bounce 1.2s infinite ease-in-out, textGlow 2s infinite alternate;
+    z-index: 1000;
+    white-space: nowrap;
+    pointer-events: none;
+    font-family: 'Segoe UI', 'Microsoft YaHei', monospace;
+}
+@keyframes bounce {
+    0%,100% { transform: translateY(0px); }
+    50% { transform: translateY(10px); }
+}
+@keyframes textGlow {
+    0% { text-shadow: 0 0 4px rgba(0,204,255,0.4); }
+    100% { text-shadow: 0 0 12px rgba(0,204,255,0.9); }
+}
+</style>
+
+<div class="down-arrow-container">
     <div class="down-arrow">
-        <svg width="50" height="50" viewBox="0 0 50 50 style="display: block;"">
+        <svg width="50" height="50" viewBox="0 0 50 50" style="display:block;">
             <circle cx="25" cy="25" r="20" stroke="#00e6ff" stroke-width="1.5" fill="none" stroke-dasharray="4 4" opacity="0.6">
                 <animateTransform attributeName="transform" type="rotate" from="0 25 25" to="360 25 25" dur="3s" repeatCount="indefinite"/>
             </circle>
@@ -930,7 +926,8 @@ elif st.session_state.page_state == "result":
         </svg>
     </div>
     <div class="down-arrow-text">下方查看维修工单</div>
-    """, unsafe_allow_html=True)
+</div>
+""", unsafe_allow_html=True)
     
     st.markdown("---")
     st.markdown('<div class="tech-title">⚙️ 维修工单</div>', unsafe_allow_html=True)
