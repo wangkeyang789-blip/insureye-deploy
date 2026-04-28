@@ -1,8 +1,9 @@
 import os
 import sys
 # 强制绕过 libGL 错误
-os.environ['CV2_OPENCV_HEADLESS'] = '1'
-os.environ['OPENCV_VIDEOIO_PRIORITY'] = '0'
+os.environ["OPENCV_VIDEOIO_PRIORITY"] = "0"
+os.environ["CV2_OPENCV_HEADLESS"] = "1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 import streamlit as st
 import torch
 import torch.nn as nn
