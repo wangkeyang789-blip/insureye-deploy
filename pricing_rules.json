@@ -1,0 +1,26 @@
+{
+  "action_en": {
+    "Normal": "No repair needed",
+    "Scratch": "Polish/repaint",
+    "Dent": "Dent repair",
+    "Glass Break": "Glass replacement"
+  },
+  "type_base_cost": {
+    "Normal": 0,
+    "Scratch": 220,
+    "Dent": 480,
+    "Glass Break": 1300
+  },
+  "severity_multiplier": {
+    "minor": 1.0,
+    "moderate": 1.6,
+    "severe": 2.4
+  },
+  "part_multiplier": {
+    "Door": 1.2,
+    "Bumper": 1.1,
+    "Fender": 1.1,
+    "Hood": 1.25,
+    "Trunk": 1.2
+  }
+}
