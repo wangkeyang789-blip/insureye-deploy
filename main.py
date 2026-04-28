@@ -1091,4 +1091,4 @@ elif st.session_state.page_state == "architecture":
             st.rerun()
 
 # 底部
-st.markdown("<div style='text-align:center;color:#00CCFF;padding:20px;font-size:12px;letter-spacing:1px;'>⌘ INSUREYE v1.0 · 智能车辆定损系统 · 王可扬 · © 2026 ⌘</div>", unsafe_allow_html=True)
+st.markdown("<div style='text-align:center;color:#00CCFF;padding:20px;font-size:12px;letter-spacing:1px;'>⌘ INSUREYE v1.0 · 智能车辆定损系统 · 王可扬 · 韩天一 · © 2026 ⌘</div>", unsafe_allow_html=True)
