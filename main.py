@@ -876,7 +876,7 @@ elif st.session_state.page_state == "result":
     .down-arrow {
         position: fixed;
         left: 20%;
-        top: 50%;
+        top: 100%;
         z-index: 1000;
         opacity: 0.95;
         pointer-events: none;
