@@ -749,7 +749,7 @@ if st.session_state.page_state == "home":
     """, unsafe_allow_html=True)
 
     # 原生按钮，不刷新页面！
-    if st.button("暂无实拍？一键加载示例样图！", use_container_width=True):
+    if st.button("暂无实拍？点此加载示例样图！", use_container_width=True):
         sample_dir = "sample_demo"
         img_list = []
         if os.path.exists(sample_dir):
