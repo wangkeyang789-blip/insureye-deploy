@@ -1,0 +1,16 @@
+name: Keep InsurEye Alive
+on:
+  schedule:
+    - cron: '*/15 * * * *'  # 每15分钟运行一次，平衡免费额度与保活效果
+jobs:
+  wakeup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Chromium
+        run: sudo apt-get update && sudo apt-get install -y chromium-browser
+
+      - name: Visit Streamlit App
+        run: |
+          chromium-browser --headless --disable-gpu --no-sandbox "https://insureye-deploy-vn4bc3cqlgbdlkmyntswdz.streamlit.app/" &
+          sleep 10
+          pkill chromium-browser
