@@ -1,18 +1,12 @@
 name: Keep InsurEye Alive
 on:
-  push:
-    branches: [ main ]
   schedule:
     - cron: '*/10 * * * *'
   workflow_dispatch:
 
 jobs:
-  wakeup:
+  keep-alive:
     runs-on: ubuntu-latest
-    timeout-minutes: 3
     steps:
-      - name: Keep app alive
-        uses: fjogeleit/http-request-action@v1
-        with:
-          url: 'https://insureye-deploy-vn4bc3cqlgbdlkmyntswdz.streamlit.app/'
-          method: 'GET'
+      - name: Call Streamlit App
+        run: curl -L -v "https://insureye-deploy-vn4bc3cqlgbdlkmyntswdz.streamlit.app/" || true
