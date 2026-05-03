@@ -1,35 +1,18 @@
 name: Keep InsurEye Alive
 on:
+  push:
+    branches: [ main ]
   schedule:
-    - cron: '*/15 * * * *'
-  workflow_dispatch: # 支持手动触发
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
 
 jobs:
   wakeup:
     runs-on: ubuntu-latest
+    timeout-minutes: 3
     steps:
-      - uses: actions/checkout@v4
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - name: Keep app alive
+        uses: fjogeleit/http-request-action@v1
         with:
-          node-version: 20
-
-      - name: Install Playwright
-        run: |
-          npm init -y
-          npm i -D playwright
-          npx playwright install chromium --with-deps
-
-      - name: Visit app to keep it alive
-        run: |
-          cat > visit.js << 'EOF'
-          const { chromium } = require('playwright');
-          (async () => {
-            const browser = await chromium.launch({ headless: true });
-            const page = await browser.newPage();
-            await page.goto('https://insureye-deploy-vn4bc3cqlgbdlkmyntswdz.streamlit.app/');
-            await page.waitForTimeout(5000); // 等待5秒，确保页面加载完成
-            await browser.close();
-          })();
-          EOF
-          node visit.js
+          url: 'https://insureye-deploy-vn4bc3cqlgbdlkmyntswdz.streamlit.app/'
+          method: 'GET'
