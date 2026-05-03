@@ -1,7 +1,9 @@
 name: Keep InsurEye Alive
 on:
   schedule:
-    - cron: '*/15 * * * *'  # 每15分钟运行一次，平衡免费额度与保活效果
+    - cron: '*/15 * * * *'
+  workflow_dispatch: # 支持手动触发
+
 jobs:
   wakeup:
     runs-on: ubuntu-latest
