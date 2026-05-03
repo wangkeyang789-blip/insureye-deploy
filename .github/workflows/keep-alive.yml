@@ -8,11 +8,28 @@ jobs:
   wakeup:
     runs-on: ubuntu-latest
     steps:
-      - name: Install Chromium
-        run: sudo apt-get update && sudo apt-get install -y chromium-browser
+      - uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
 
-      - name: Visit Streamlit App
+      - name: Install Playwright
         run: |
-          chromium-browser --headless --disable-gpu --no-sandbox "https://insureye-deploy-vn4bc3cqlgbdlkmyntswdz.streamlit.app/" &
-          sleep 10
-          pkill chromium-browser
+          npm init -y
+          npm i -D playwright
+          npx playwright install chromium --with-deps
+
+      - name: Visit app to keep it alive
+        run: |
+          cat > visit.js << 'EOF'
+          const { chromium } = require('playwright');
+          (async () => {
+            const browser = await chromium.launch({ headless: true });
+            const page = await browser.newPage();
+            await page.goto('https://insureye-deploy-vn4bc3cqlgbdlkmyntswdz.streamlit.app/');
+            await page.waitForTimeout(5000); // 等待5秒，确保页面加载完成
+            await browser.close();
+          })();
+          EOF
+          node visit.js
