@@ -1,9 +1,13 @@
+import streamlit as st
+# ---------------------- 防休眠心跳接口（必须加） ----------------------
+if st.query_params.get("keep_alive") == "true":
+    st.write("✅ 心跳正常 - 应用保持活跃")
+    st.stop()
 import os
 import sys
 # 强制绕过 libGL 错误
 os.environ["OPENCV_VIDEOIO_PRIORITY"] = "0"
 os.environ["CV2_OPENCV_HEADLESS"] = "1"
-import streamlit as st
 import torch
 import torch.nn as nn
 from ultralytics import YOLO
