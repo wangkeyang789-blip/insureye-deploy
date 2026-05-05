@@ -1,12 +1,21 @@
-name: Keep InsurEye Alive
+name: Streamlit Keep Alive
 on:
   schedule:
-    - cron: '*/10 * * * *'
-  workflow_dispatch:
+    - cron: '*/30 * * * *'  # 每30分钟唤醒一次（稳定不触发反制）
+  workflow_dispatch:  # 允许手动点击运行
 
 jobs:
   keep-alive:
     runs-on: ubuntu-latest
     steps:
-      - name: Call Streamlit App
-        run: curl -L -v "https://insureye-deploy-vn4bc3cqlgbdlkmyntswdz.streamlit.app/" || true
+      - name: Install Chrome Headless
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget
+          wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+          sudo dpkg -i google-chrome-stable_current_amd64.deb || sudo apt-get -fy install
+
+      - name: Wake Up Streamlit (有效唤醒)
+        run: |
+          # 把这里换成你自己的 Streamlit 地址 + ?keep_alive=true
+          google-chrome --headless=new --disable-gpu --no-sandbox "https://insureye-deploy-vn4bc3qlgbdlkmyntswdz.streamlit.app/?keep_alive=true" || true
