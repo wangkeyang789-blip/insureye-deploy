@@ -1,21 +1,50 @@
 name: Streamlit Keep Alive
+
 on:
   schedule:
-    - cron: '*/30 * * * *'  # 每30分钟唤醒一次（稳定不触发反制）
-  workflow_dispatch:  # 允许手动点击运行
+    - cron: '0 */6 * * *'  # 每6小时跑一次，刚好在12小时休眠阈值内
+  workflow_dispatch:  # 允许手动触发测试
 
 jobs:
   keep-alive:
     runs-on: ubuntu-latest
     steps:
-      - name: Install Chrome Headless
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y wget
-          wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-          sudo dpkg -i google-chrome-stable_current_amd64.deb || sudo apt-get -fy install
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
 
-      - name: Wake Up Streamlit (有效唤醒)
+      - name: Install Playwright
         run: |
-          # 把这里换成你自己的 Streamlit 地址 + ?keep_alive=true
-          google-chrome --headless=new --disable-gpu --no-sandbox "https://insureye-deploy-vn4bc3qlgbdlkmyntswdz.streamlit.app/?keep_alive=true" || true
+          npm init -y
+          npm install playwright
+          npx playwright install chromium --with-deps
+
+      - name: Wake up Streamlit (有效唤醒)
+        run: |
+          node -e "
+            const { chromium } = require('playwright');
+            (async () => {
+              try {
+                // 启动浏览器
+                const browser = await chromium.launch({
+                  headless: true,
+                  args: ['--no-sandbox', '--disable-dev-shm-usage']
+                });
+                const page = await browser.newPage();
+                
+                // 访问你的应用
+                await page.goto('https://insureye-deploy-vn4bc3q1gbdlkmnytswdz.streamlit.app/?keep_alive=true');
+                
+                // 保持页面打开10秒，让JS和WebSocket连接完成
+                await page.waitForTimeout(10000);
+                
+                console.log('✅ 成功访问并唤醒 Streamlit 应用');
+                await browser.close();
+                process.exit(0);
+              } catch (error) {
+                console.error('❌ 访问失败:', error);
+                process.exit(1);
+              }
+            })();
+          "
