@@ -2,7 +2,7 @@ name: Streamlit Keep Alive
 
 on:
   schedule:
-    - cron: '0 */6 * * *'  # 每6小时跑一次，刚好在12小时休眠阈值内
+    - cron: '0 */4 * * *'  # 每6小时跑一次，刚好在12小时休眠阈值内
   workflow_dispatch:  # 允许手动触发测试
 
 jobs:
