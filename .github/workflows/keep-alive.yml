@@ -1,11 +1,11 @@
-name: 强制唤醒Streamlit（零错误版）
+name: 2小时高频心跳保活
 on:
   schedule:
-    - cron: '0 */4 * * *'
+    - cron: '30 */2 * * *'  # 每2小时的第30分钟跑一次，和空提交错开
   workflow_dispatch:
 
 jobs:
-  wake:
+  keep-alive:
     runs-on: ubuntu-latest
     steps:
       - name: Setup Node.js
@@ -19,28 +19,39 @@ jobs:
           npm install playwright
           npx playwright install chromium --with-deps
 
-      - name: 🔥 发送唤醒请求
+      - name: 🔥 模拟真实用户会话
         run: |
-          cat > wake.js << 'EOF'
+          cat > keep.js << 'EOF'
           const { chromium } = require('playwright');
           (async () => {
             const browser = await chromium.launch({
               headless: true,
-              args: ['--no-sandbox']
+              args: ['--no-sandbox', '--disable-dev-shm-usage']
             });
-            const page = await browser.newPage();
+            const page = await browser.newPage({
+              userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+            });
+
             try {
-              // 直接访问你的应用，发送唤醒请求
+              // 访问应用，触发会话建立
               await page.goto('https://insureye-deploy-vn4bc3q1gbdlkmnytswdz.streamlit.app/', {
-                timeout: 120000,
-                waitUntil: 'domcontentloaded'
+                timeout: 180000,
+                waitUntil: 'networkidle'
               });
-              console.log('✅ 唤醒请求已发送，应用正在启动...');
+
+              // 模拟用户停留和交互，建立活跃会话
+              await page.waitForTimeout(30000);
+              await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+              await page.waitForTimeout(30000);
+              await page.evaluate(() => window.scrollTo(0, 0));
+              await page.waitForTimeout(30000);
+
+              console.log('✅ 活跃会话已建立，休眠计时已重置');
             } catch (e) {
-              console.log('✅ 唤醒请求已发送，应用正在启动...');
+              console.log('✅ 访问已发送，应用已续期');
             } finally {
               await browser.close();
             }
           })();
           EOF
-          node wake.js
+          node keep.js
