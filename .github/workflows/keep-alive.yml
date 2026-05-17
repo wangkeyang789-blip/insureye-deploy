@@ -1,56 +1,23 @@
-name: Streamlit Keep Alive (No Selector)
-
+name: 4小时空提交保活Streamlit
 on:
   schedule:
     - cron: '0 */4 * * *'
   workflow_dispatch:
 
 jobs:
-  keep-alive:
+  keep:
     runs-on: ubuntu-latest
     steps:
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
         with:
-          node-version: 20
+          persist-credentials: true
 
-      - name: Install Playwright
+      - name: 配置提交身份
         run: |
-          npm init -y
-          npm install playwright
-          npx playwright install chromium --with-deps
+          git config user.name "AutoKeep"
+          git config user.email "keep@github.com"
 
-      - name: 🔥 纯心跳唤醒（跳过选择器，永不超时）
+      - name: 空提交推送
         run: |
-          node -e "
-            const { chromium } = require('playwright');
-            (async () => {
-              try {
-                const browser = await chromium.launch({
-                  headless: true,
-                  args: ['--no-sandbox', '--disable-dev-shm-usage']
-                });
-                
-                const page = await browser.newPage({
-                  userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-                });
-
-                // 1. 访问应用，触发启动
-                console.log('访问应用，触发冷启动...');
-                await page.goto('https://insureye-deploy-vn4bc3q1gbdlkmnytswdz.streamlit.app/', {
-                  timeout: 120000, // 给足2分钟超时
-                  waitUntil: 'domcontentloaded'
-                });
-
-                // 2. 直接等待，给应用启动+渲染的时间
-                console.log('等待应用启动完成（120秒）...');
-                await page.waitForTimeout(120000);
-
-                console.log('✅ 心跳发送成功，休眠计时器已重置');
-                await browser.close();
-              } catch (err) {
-                console.error('❌ 失败:', err);
-                process.exit(1);
-              }
-            })();
-          "
+          git commit --allow-empty -m "4h保活续期"
+          git push
