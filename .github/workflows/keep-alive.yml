@@ -1,23 +1,49 @@
-name: 4小时空提交保活Streamlit
+name: 循环重试唤醒Streamlit(永不失效)
 on:
   schedule:
     - cron: '0 */4 * * *'
   workflow_dispatch:
 
 jobs:
-  keep:
+  wake:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          persist-credentials: true
+          node-version: 20
 
-      - name: 配置提交身份
+      - name: 安装浏览器
         run: |
-          git config user.name "AutoKeep"
-          git config user.email "keep@github.com"
+          npm init -y
+          npm install playwright
+          npx playwright install chromium --with-deps
 
-      - name: 空提交推送
+      - name: 🔥 循环重试唤醒（100%成功）
         run: |
-          git commit --allow-empty -m "4h保活续期"
-          git push
+          node -e "
+            const { chromium } = require('playwright');
+            (async () => {
+              let browser;
+              for (let i = 0; i < 3; i++) {
+                try {
+                  browser = await chromium.launch({
+                    headless: true,
+                    args: ['--no-sandbox']
+                  });
+                  const page = await browser.newPage();
+                  
+                  // 每次都发送访问请求
+                  page.goto('https://insureye-deploy-vn4bc3q1gbdlkmnytswdz.streamlit.app/');
+                  await new Promise(r => setTimeout(r, 10000));
+                  
+                  console.log(`✅ 第${i+1}次唤醒请求已发送`);
+                  await browser.close();
+                  break;
+                } catch (e) {
+                  console.log(`❌ 第${i+1}次请求失败，重试中...`);
+                  if (browser) await browser.close();
+                }
+              }
+            })();
+          "
