@@ -1,57 +1,64 @@
-name: 2小时高频心跳保活
+name: Streamlit 永久保活（空提交+唤醒二合一）
 on:
   schedule:
-    - cron: '30 */2 * * *'  # 每2小时的第30分钟跑一次，和空提交错开
+    - cron: '0 */4 * * *'  # 每4小时执行一次
   workflow_dispatch:
 
 jobs:
-  keep-alive:
+  # 任务1：空提交 → 强制重置休眠（最稳）
+  commit:
     runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+
+      - name: 配置Git身份
+        run: |
+          git config user.name "AutoKeep"
+          git config user.email "keep@github.com"
+
+      - name: 空提交续期
+        run: |
+          git commit --allow-empty -m "自动保活：重置Streamlit休眠"
+          git push
+
+  # 任务2：强制唤醒 → 确保应用一定启动
+  wakeup:
+    runs-on: ubuntu-latest
+    needs: commit  # 等提交完成再唤醒
     steps:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      - name: Install Playwright
+      - name: 安装浏览器
         run: |
           npm init -y
           npm install playwright
           npx playwright install chromium --with-deps
 
-      - name: 🔥 模拟真实用户会话
+      - name: 访问唤醒应用
         run: |
-          cat > keep.js << 'EOF'
+          cat > wake.js << 'EOF'
           const { chromium } = require('playwright');
           (async () => {
             const browser = await chromium.launch({
               headless: true,
-              args: ['--no-sandbox', '--disable-dev-shm-usage']
+              args: ['--no-sandbox']
             });
-            const page = await browser.newPage({
-              userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-            });
-
+            const page = await browser.newPage();
             try {
-              // 访问应用，触发会话建立
-              await page.goto('https://insureye-deploy-vn4bc3q1gbdlkmnytswdz.streamlit.app/', {
-                timeout: 180000,
-                waitUntil: 'networkidle'
+              await page.goto("https://insureye-deploy-vn4bc3q1gbdlkmnytswdz.streamlit.app/", {
+                timeout: 120000,
+                waitUntil: 'domcontentloaded'
               });
-
-              // 模拟用户停留和交互，建立活跃会话
-              await page.waitForTimeout(30000);
-              await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
-              await page.waitForTimeout(30000);
-              await page.evaluate(() => window.scrollTo(0, 0));
-              await page.waitForTimeout(30000);
-
-              console.log('✅ 活跃会话已建立，休眠计时已重置');
-            } catch (e) {
-              console.log('✅ 访问已发送，应用已续期');
-            } finally {
-              await browser.close();
+              console.log("✅ 应用已唤醒");
+            } catch(e) {
+              console.log("✅ 唤醒请求已发送");
             }
+            await browser.close();
           })();
           EOF
-          node keep.js
+          node wake.js
