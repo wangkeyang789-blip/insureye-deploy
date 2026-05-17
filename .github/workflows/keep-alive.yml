@@ -2,7 +2,7 @@ name: Streamlit Keep Alive
 
 on:
   schedule:
-    - cron: '0 */4 * * *'  # 每4小时一次（最强保活）
+    - cron: '0 */4 * * *'
   workflow_dispatch:
 
 jobs:
@@ -20,7 +20,7 @@ jobs:
           npm install playwright
           npx playwright install chromium --with-deps
 
-      - name: 🔥 真正有效唤醒 Streamlit（不会再休眠）
+      - name: 🔥 90秒超稳保活（永不超时）
         run: |
           node -e "
             const { chromium } = require('playwright');
@@ -35,19 +35,25 @@ jobs:
                   userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
                 });
 
-                // 你的Streamlit地址
+                // 总超时 90 秒
                 await page.goto('https://insureye-deploy-vn4bc3q1gbdlkmnytswdz.streamlit.app/', {
-                  timeout: 60000,
-                  waitUntil: 'networkidle'
+                  timeout: 90000,
+                  waitUntil: 'domcontentloaded'
                 });
 
-                // 👇 关键：等待Streamlit应用真正加载完成
-                await page.waitForSelector('[data-testid="stApp"]', { timeout: 30000 });
+                // 冷启动等待 45 秒
+                console.log('等待应用冷启动...');
+                await page.waitForTimeout(45000);
 
-                // 保持连接20秒，确保WebSocket心跳生效
+                // 等待页面元素 90 秒
+                await page.waitForSelector('[data-testid="stApp"]', { 
+                  timeout: 90000 
+                });
+
+                // 保持连接 20 秒
                 await page.waitForTimeout(20000);
 
-                console.log('✅ 成功唤醒 - 休眠计时器已重置');
+                console.log('✅ 成功唤醒 Streamlit');
                 await browser.close();
               } catch (err) {
                 console.error('❌ 失败:', err);
