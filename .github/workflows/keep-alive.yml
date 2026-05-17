@@ -2,8 +2,8 @@ name: Streamlit Keep Alive
 
 on:
   schedule:
-    - cron: '0 */4 * * *'  # 每6小时跑一次，刚好在12小时休眠阈值内
-  workflow_dispatch:  # 允许手动触发测试
+    - cron: '0 */4 * * *'  # 每4小时一次（最强保活）
+  workflow_dispatch:
 
 jobs:
   keep-alive:
@@ -20,30 +20,37 @@ jobs:
           npm install playwright
           npx playwright install chromium --with-deps
 
-      - name: Wake up Streamlit (有效唤醒)
+      - name: 🔥 真正有效唤醒 Streamlit（不会再休眠）
         run: |
           node -e "
             const { chromium } = require('playwright');
             (async () => {
               try {
-                // 启动浏览器
                 const browser = await chromium.launch({
                   headless: true,
                   args: ['--no-sandbox', '--disable-dev-shm-usage']
                 });
-                const page = await browser.newPage();
                 
-                // 访问你的应用
-                await page.goto('https://insureye-deploy-vn4bc3q1gbdlkmnytswdz.streamlit.app/?keep_alive=true');
-                
-                // 保持页面打开10秒，让JS和WebSocket连接完成
-                await page.waitForTimeout(10000);
-                
-                console.log('✅ 成功访问并唤醒 Streamlit 应用');
+                const page = await browser.newPage({
+                  userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+                });
+
+                // 你的Streamlit地址
+                await page.goto('https://insureye-deploy-vn4bc3q1gbdlkmnytswdz.streamlit.app/', {
+                  timeout: 60000,
+                  waitUntil: 'networkidle'
+                });
+
+                // 👇 关键：等待Streamlit应用真正加载完成
+                await page.waitForSelector('[data-testid="stApp"]', { timeout: 30000 });
+
+                // 保持连接20秒，确保WebSocket心跳生效
+                await page.waitForTimeout(20000);
+
+                console.log('✅ 成功唤醒 - 休眠计时器已重置');
                 await browser.close();
-                process.exit(0);
-              } catch (error) {
-                console.error('❌ 访问失败:', error);
+              } catch (err) {
+                console.error('❌ 失败:', err);
                 process.exit(1);
               }
             })();
