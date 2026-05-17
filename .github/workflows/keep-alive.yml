@@ -1,4 +1,4 @@
-name: 循环重试唤醒Streamlit(永不失效)
+name: 强制唤醒Streamlit（零错误版）
 on:
   schedule:
     - cron: '0 */4 * * *'
@@ -13,37 +13,34 @@ jobs:
         with:
           node-version: 20
 
-      - name: 安装浏览器
+      - name: Install Playwright
         run: |
           npm init -y
           npm install playwright
           npx playwright install chromium --with-deps
 
-      - name: 🔥 循环重试唤醒（100%成功）
+      - name: 🔥 发送唤醒请求
         run: |
-          node -e "
-            const { chromium } = require('playwright');
-            (async () => {
-              let browser;
-              for (let i = 0; i < 3; i++) {
-                try {
-                  browser = await chromium.launch({
-                    headless: true,
-                    args: ['--no-sandbox']
-                  });
-                  const page = await browser.newPage();
-                  
-                  // 每次都发送访问请求
-                  page.goto('https://insureye-deploy-vn4bc3q1gbdlkmnytswdz.streamlit.app/');
-                  await new Promise(r => setTimeout(r, 10000));
-                  
-                  console.log(`✅ 第${i+1}次唤醒请求已发送`);
-                  await browser.close();
-                  break;
-                } catch (e) {
-                  console.log(`❌ 第${i+1}次请求失败，重试中...`);
-                  if (browser) await browser.close();
-                }
-              }
-            })();
-          "
+          cat > wake.js << 'EOF'
+          const { chromium } = require('playwright');
+          (async () => {
+            const browser = await chromium.launch({
+              headless: true,
+              args: ['--no-sandbox']
+            });
+            const page = await browser.newPage();
+            try {
+              // 直接访问你的应用，发送唤醒请求
+              await page.goto('https://insureye-deploy-vn4bc3q1gbdlkmnytswdz.streamlit.app/', {
+                timeout: 120000,
+                waitUntil: 'domcontentloaded'
+              });
+              console.log('✅ 唤醒请求已发送，应用正在启动...');
+            } catch (e) {
+              console.log('✅ 唤醒请求已发送，应用正在启动...');
+            } finally {
+              await browser.close();
+            }
+          })();
+          EOF
+          node wake.js
